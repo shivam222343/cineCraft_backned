@@ -5,7 +5,7 @@ const pool = new Pool({
   user: 'cineuser',
   host: 'localhost',
   database: 'cinecraft',
-  password: 'MH22Parbhani@',
+  password: 'admin',
   port: 5432,
 });
 

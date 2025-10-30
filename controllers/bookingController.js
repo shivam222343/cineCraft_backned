@@ -2,13 +2,51 @@ import { Booking } from '../models/bookingModel.js';
 
 export const createBooking = async (req, res, next) => {
   try {
-    const { user_id, service_id, name, email, phone, date, time, message, image } = req.body;
-    if (!name || !email || !phone || !date || !time) {
-      return res.status(400).json({ success: false, message: 'Name, email, phone, date, and time are required' });
+    const { user_id, service_id, name, email, phone, date, time, message, image, type } = req.body;
+    
+    // For enquiries, we only require name, email, phone, and service_id
+    if (type === 'enquiry') {
+      if (!name || !email || !phone) {
+        return res.status(400).json({ success: false, message: 'Name, email, and phone are required for enquiry' });
+      }
+      // Set default values for enquiry
+      const enquiryData = {
+        user_id: user_id || null,
+        service_id: service_id || null,
+        name: name.trim(),
+        email: email.trim(),
+        phone: phone.trim(),
+        date: null, // Always null for enquiries
+        time: null, // Always null for enquiries
+        message: message ? message.trim() : '',
+        image: image || null,
+        type: 'enquiry', // IMPORTANT: Set type as enquiry
+        status: 'pending' // Set status as pending for enquiries
+      };
+      const booking = await Booking.create(enquiryData);
+      res.status(201).json({ success: true, data: booking, message: 'Enquiry submitted successfully!' });
+    } else {
+      // Original booking logic - requires date and time
+      if (!name || !email || !phone || !date || !time) {
+        return res.status(400).json({ success: false, message: 'Name, email, phone, date, and time are required for bookings' });
+      }
+      const booking = await Booking.create({ 
+        user_id: user_id || null, 
+        service_id: service_id || null, 
+        name: name.trim(), 
+        email: email.trim(), 
+        phone: phone.trim(), 
+        date, 
+        time, 
+        message: message ? message.trim() : '', 
+        image: image || null, 
+        type: 'booking', 
+        status: 'pending' 
+      });
+      res.status(201).json({ success: true, data: booking });
     }
-    const booking = await Booking.create({ user_id, service_id, name, email, phone, date, time, message, image });
-    res.status(201).json({ success: true, data: booking });
   } catch (err) {
+    console.error('Booking creation error:', err);
     next(err);
   }
 };

@@ -23,18 +23,17 @@ export const getServiceById = async (req, res, next) => {
 
 export const createService = async (req, res, next) => {
   try {
-    const { title, description, price, duration, features, category, image } = req.body;
+    const { title, description, duration, features, category, image } = req.body;
     
     // Validation
     if (!title) return res.status(400).json({ success: false, message: 'Title is required' });
     if (!description) return res.status(400).json({ success: false, message: 'Description is required' });
-    if (!price) return res.status(400).json({ success: false, message: 'Price is required' });
     if (!duration) return res.status(400).json({ success: false, message: 'Duration is required' });
     
     const serviceData = {
       title,
       description,
-      price: parseFloat(price),
+      price: 0, // Set default price to 0 since we're removing pricing
       duration,
       features: features || [],
       category: category || 'photography',
@@ -51,7 +50,7 @@ export const createService = async (req, res, next) => {
 export const updateService = async (req, res, next) => {
   try {
     const id = req.params.id;
-    const { title, description, price, duration, features, category, image } = req.body;
+    const { title, description, duration, features, category, image } = req.body;
     
     // Check if service exists
     const existingService = await Service.findById(id);
@@ -60,7 +59,7 @@ export const updateService = async (req, res, next) => {
     const serviceData = {
       title: title || existingService.title,
       description: description || existingService.description,
-      price: price ? parseFloat(price) : existingService.price,
+      price: 0, // Always set price to 0 since we're removing pricing
       duration: duration || existingService.duration,
       features: features !== undefined ? features : existingService.features,
       category: category || existingService.category,

@@ -100,4 +100,66 @@ router.post('/images', upload.array('images', 10), async (req, res) => {
   }
 });
 
+// Upload single video file
+router.post('/video', (req, res) => {
+  // Set timeout for the request
+  req.setTimeout(60000); // 60 seconds timeout for videos
+  
+  upload.single('video')(req, res, async (err) => {
+    try {
+      // Handle multer errors
+      if (err) {
+        console.error('Video upload multer error:', err);
+        return res.status(400).json({
+          success: false,
+          message: err.message || 'Video upload error',
+          error: err.code || 'UPLOAD_ERROR'
+        });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({
+          success: false,
+          message: 'No video file provided'
+        });
+      }
+
+      // Cloudinary automatically uploads the file and provides the URL
+      const fileUrl = req.file.path;
+      const publicId = req.file.filename;
+      const fileType = req.file.mimetype;
+      const isVideo = fileType.startsWith('video/');
+
+      console.log('Video uploaded successfully:', {
+        originalName: req.file.originalname,
+        fileType: fileType,
+        size: req.file.size,
+        url: fileUrl
+      });
+
+      res.status(200).json({
+        success: true,
+        message: 'Video uploaded successfully',
+        url: fileUrl, // For backward compatibility
+        data: {
+          url: fileUrl,
+          publicId: publicId,
+          originalName: req.file.originalname,
+          size: req.file.size,
+          fileType: fileType,
+          isVideo: isVideo
+        }
+      });
+
+    } catch (error) {
+      console.error('Video upload processing error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to process uploaded video',
+        error: error.message
+      });
+    }
+  });
+});
+
 export default router;

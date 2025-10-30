@@ -42,7 +42,7 @@ export const getPortfolioByCategory = async (req, res, next) => {
 
 export const createPortfolioItem = async (req, res, next) => {
   try {
-    const { title, description, category, client, date, location, images, tags, featured, status, media_url } = req.body;
+    const { title, description, category, client, year, date, location, thumbnail, images, tags, services, duration, featured, status } = req.body;
     
     // Validation
     if (!title) return res.status(400).json({ success: false, message: 'Title is required' });
@@ -57,13 +57,16 @@ export const createPortfolioItem = async (req, res, next) => {
       description,
       category: portfolioCategory,
       client: client || null,
+      year: year || null,
       date: date || null,
       location: location || null,
+      thumbnail: thumbnail || null,
       images: Array.isArray(images) ? images : (images ? [images] : []),
       tags: Array.isArray(tags) ? tags : (tags ? tags.split(',').map(t => t.trim()) : []),
+      services: Array.isArray(services) ? services : (services ? services.split(',').map(s => s.trim()) : []),
+      duration: duration || null,
       featured: featured || false,
-      status: status || 'published',
-      media_url: media_url || null
+      status: status || 'published'
     };
     
     const item = await Portfolio.create(portfolioData);
@@ -76,7 +79,7 @@ export const createPortfolioItem = async (req, res, next) => {
 export const updatePortfolioItem = async (req, res, next) => {
   try {
     const id = req.params.id;
-    const { title, description, category, client, date, location, images, tags, featured, status, media_url } = req.body;
+    const { title, description, category, client, year, date, location, thumbnail, images, tags, services, duration, featured, status } = req.body;
     
     // Check if portfolio item exists
     const existingItem = await Portfolio.findById(id);
@@ -91,13 +94,16 @@ export const updatePortfolioItem = async (req, res, next) => {
       description: description || existingItem.description,
       category: portfolioCategory,
       client: client !== undefined ? client : existingItem.client,
+      year: year !== undefined ? year : existingItem.year,
       date: date !== undefined ? date : existingItem.date,
       location: location !== undefined ? location : existingItem.location,
+      thumbnail: thumbnail !== undefined ? thumbnail : existingItem.thumbnail,
       images: images !== undefined ? (Array.isArray(images) ? images : (images ? [images] : [])) : existingItem.images,
       tags: tags !== undefined ? (Array.isArray(tags) ? tags : (tags ? tags.split(',').map(t => t.trim()) : [])) : existingItem.tags,
+      services: services !== undefined ? (Array.isArray(services) ? services : (services ? services.split(',').map(s => s.trim()) : [])) : existingItem.services,
+      duration: duration !== undefined ? duration : existingItem.duration,
       featured: featured !== undefined ? featured : existingItem.featured,
-      status: status || existingItem.status,
-      media_url: media_url !== undefined ? media_url : existingItem.media_url
+      status: status || existingItem.status
     };
     
     const item = await Portfolio.update(id, portfolioData);
